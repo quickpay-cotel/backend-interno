@@ -1,7 +1,8 @@
 // auth.controller.ts
-import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Request, UseInterceptors, HttpException, HttpStatus } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
 
 @Controller('usuario')
 export class UsuarioController {
@@ -17,8 +18,6 @@ export class UsuarioController {
   @Get('get-options')
   @UseGuards(JwtAuthGuard) // Protege el endpoint con el guardia JWT
   async getOptions(@Request() req) {
-    console.log("holaaaaaaa");
-   console.log(req);
-
+    return await this.usuariosService.getOptions(req.user.username);
   }
 }

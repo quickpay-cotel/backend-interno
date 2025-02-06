@@ -24,4 +24,20 @@ export class UsuarioUsuariosRepository {
     const query = 'select * from usuario.usuarios u where u.estado_id = 1000 and u.username = $1';
     return await this.db.oneOrNone(query, [userName]);
   }
+  async findOptionsByUserName(userName: string) {
+    const query = `  select o.nombre,o.description,o.url_path from usuario.usuarios u 
+    inner join usuario.usuarios_roles ur on ur.usuario_id = u.usuario_id and ur.estado_id = 1000
+    inner join usuario.roles_opciones ro on ro.rol_id = ur.rol_id and ro.estado_id = 1000
+    inner join usuario.opciones o on o.opcion_id = ro.opcion_id and o.estado_id = 1000
+    where u.username = $1`;
+    return await this.db.manyOrNone(query, [userName]);
+  }
+  async findPersonaNaturalByPersonaId(personaId:number){
+    const query = "select (pn.nombres ||''|| pn.apellidos) as nombres from usuario.persona_natural pn where pn.persona_natural_id = $1 and estado_id = 1000";
+    return await this.db.oneOrNone(query, [personaId]);
+  }
+  async findPersonaJuridicaByPersonaId(personaId:number){
+    const query = 'select pj.nombre_empresa as nombres from usuario.persona_juridica  pj where pj.persona_juridica_id = $1 and pj.estado_id = 1000';
+    return await this.db.oneOrNone(query, [personaId]);
+  }
 }

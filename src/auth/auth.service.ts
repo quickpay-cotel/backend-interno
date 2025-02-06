@@ -23,9 +23,17 @@ export class AuthService {
       if (!isPasswordValid) {
         throw new UnauthorizedException('Contraseña incorrecta');
       }
-  
+
+      let datosPersona = null;
+      if(user.persona_natural_id && !user.persona_juridica_id){
+        datosPersona =  await this.usuarioUsuariosRepository.findPersonaNaturalByPersonaId(user.persona_natural_id)
+      }else{
+        datosPersona = await  this.usuarioUsuariosRepository.findPersonaJuridicaByPersonaId(user.persona_juridica_id)
+      }
+      
+      
       // Generar payload para el token
-      const payload = { sub: user.usuario_id, username: user.username };
+      const payload = { sub: user.usuario_id, username: user.username, datosPersona : datosPersona };
   
       // Firmar el token con una expiración de 1h (ajustable)
       const token = await this.jwtService.signAsync(payload, { expiresIn: '1h' });
