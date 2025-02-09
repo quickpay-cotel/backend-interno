@@ -8,8 +8,6 @@ dotenv.config(); // Carga las variables de entorno
 import * as fs from "fs";
 
 async function bootstrap() {
-
-
   const httpsOptions = {
     key: fs.readFileSync('/etc/ssl/quickpay.com.bo/private.key'),
     cert: fs.readFileSync('/etc/ssl/quickpay.com.bo/certificate.crt'),
