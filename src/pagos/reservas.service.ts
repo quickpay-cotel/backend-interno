@@ -11,9 +11,7 @@ export class ReservasService {
   ) {
 
   }
-  async findConsultasExternas() {
-    return await this.cotelApiLogRepository.findConsultasExternas();
-  }
+
   async findPagosRealizados(consultaPagosDto: ConsultaPagosDto) {
     return await this.cotelDeudasRepository.findPagosRealizados(
       consultaPagosDto.nombreCompleto, consultaPagosDto.servicio, consultaPagosDto.idTransaccion,

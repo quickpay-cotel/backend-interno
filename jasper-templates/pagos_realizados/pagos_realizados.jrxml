@@ -34,15 +34,15 @@
 		<property name="net.sf.jasperreports.json.field.expression" value="codigo_deuda"/>
 		<fieldDescription><![CDATA[codigo_deuda]]></fieldDescription>
 	</field>
-	<field name="monto" class="java.lang.String">
+	<field name="monto" class="java.lang.Float">
 		<property name="net.sf.jasperreports.json.field.expression" value="monto"/>
 		<fieldDescription><![CDATA[monto]]></fieldDescription>
 	</field>
-	<field name="comision_qp" class="java.lang.String">
+	<field name="comision_qp" class="java.lang.Float">
 		<property name="net.sf.jasperreports.json.field.expression" value="comision_qp"/>
 		<fieldDescription><![CDATA[comision_qp]]></fieldDescription>
 	</field>
-	<field name="monto_final" class="java.lang.String">
+	<field name="monto_final" class="java.lang.Float">
 		<property name="net.sf.jasperreports.json.field.expression" value="monto_final"/>
 		<fieldDescription><![CDATA[monto_final]]></fieldDescription>
 	</field>
@@ -62,11 +62,20 @@
 		<property name="net.sf.jasperreports.json.field.expression" value="fecha_pago"/>
 		<fieldDescription><![CDATA[fecha_pago]]></fieldDescription>
 	</field>
+	<variable name="vTotalMonto" class="java.lang.Float" calculation="Sum">
+		<variableExpression><![CDATA[$F{monto}]]></variableExpression>
+	</variable>
+	<variable name="vTotalComisionQP" class="java.lang.Float" calculation="Sum">
+		<variableExpression><![CDATA[$F{comision_qp}]]></variableExpression>
+	</variable>
+	<variable name="vTotalMontoFinal" class="java.lang.Float" calculation="Sum">
+		<variableExpression><![CDATA[$F{monto_final}]]></variableExpression>
+	</variable>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="62" splitType="Stretch">
+		<band height="50" splitType="Stretch">
 			<staticText>
 				<reportElement x="241" y="20" width="320" height="30" forecolor="#0D0404" uuid="25d61d29-62e3-45a6-938b-fa44e4fd560d"/>
 				<textElement textAlignment="Center">
@@ -263,7 +272,7 @@
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="35" splitType="Stretch">
+		<band height="30" splitType="Stretch">
 			<textField>
 				<reportElement x="0" y="0" width="80" height="30" uuid="9ee669eb-bdbd-40f6-879f-c7cf668cafe0">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d6618365-5905-4e01-a882-76971299f3fe"/>
@@ -448,13 +457,31 @@
 			</textField>
 		</band>
 	</detail>
-	<columnFooter>
-		<band height="45" splitType="Stretch"/>
-	</columnFooter>
-	<pageFooter>
-		<band height="54" splitType="Stretch"/>
-	</pageFooter>
 	<summary>
-		<band height="42" splitType="Stretch"/>
+		<band height="44" splitType="Stretch">
+			<textField>
+				<reportElement x="331" y="0" width="45" height="20" uuid="4d0137d2-0fb3-4799-82e4-0370f8c1518b">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{vTotalMonto}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="376" y="0" width="45" height="20" uuid="2fd9665a-ae4c-4e71-858d-24dc87c43d60"/>
+				<textElement textAlignment="Right">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{vTotalComisionQP}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="0" width="45" height="20" uuid="c168a6ba-ae2a-429a-ba0f-86181ee65649"/>
+				<textElement textAlignment="Right">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{vTotalMontoFinal}]]></textFieldExpression>
+			</textField>
+		</band>
 	</summary>
 </jasperReport>

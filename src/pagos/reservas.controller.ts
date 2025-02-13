@@ -10,12 +10,6 @@ export class ReservasController {
               private readonly jasperService:JasperService
   ) { }
 
-  @Get('consultas-externas')
-  @UseGuards(JwtAuthGuard) // Protege el endpoint con el guardia JWT
-  async getOptions(@Request() req) {
-    return await this.reservasService.findConsultasExternas();
-  }
-
 
   @Post("pagos-realizados")
   @UseGuards(JwtAuthGuard) // Protege el endpoint con el guardia JWT
