@@ -20,21 +20,23 @@ export class JasperService {
               consultaPagosDto.mensajeContrato,consultaPagosDto.tipoDocumento, 
               consultaPagosDto.numeroDocumento, consultaPagosDto.fechaInicioPago, consultaPagosDto.fechaFinPago
         );
+
         const jasperStartetPath = path.join(process.cwd(), 'reportes/jasperstarter/bin/jasperstarter');
-        const jsonFilePath = path.join(process.cwd(), 'jasper-templates/pagos_realizados/pagos_realizados.json');
-        const jrxmlFilePath = path.join(process.cwd(), 'jasper-templates/pagos_realizados/pagos_realizados.jrxml');
-        const outputFilePath = path.join(process.cwd(), 'reportes/reportes/pagos_realizados');
 
+        // Cambiar al directorio donde se encuentran los archivos .jrxml y la imagen
+        const workingDirectory = path.join(process.cwd(), 'jasper-templates/pagos_realizados');
+        process.chdir(workingDirectory);
+
+        const jsonFilePath = path.join(process.cwd(), 'pagos_realizados.json');
+        const jrxmlFilePath = path.join(process.cwd(), 'pagos_realizados.jrxml');
+        const outputFilePath = path.join(process.cwd(), 'pagos_realizados');
+        
         await fs.writeFileSync(jsonFilePath, JSON.stringify(data));
+
         return new Promise((resolve, reject) => {
-            
-            //jasperstarter.exe pr -t json --json-query "." --data-file pagos_realizados.json -f pdf -o ReportOutput pagos_realizados.jrxml
-
-            //const command = `${jasperStartetPath} pr -t json --json-query "." --data-file ${jsonFilePath} -f pdf -o ${outputFilePath} ${jrxmlFilePath}`
-
-            const command = `${jasperStartetPath} pr -t json --json-query "." --data-file ${jsonFilePath} -f ${ext} -o ${outputFilePath} ${jrxmlFilePath}`
-
+            const command = `${jasperStartetPath} pr -t json --json-query "." --data-file ${jsonFilePath} -f ${ext} -o ${outputFilePath} ${jrxmlFilePath}`;
             console.log(command);
+        
             exec(command, (error, stdout, stderr) => {
                 if (error) {
                     console.error(`Error generando el reporte: ${error.message}`);
@@ -42,7 +44,7 @@ export class JasperService {
                     return;
                 }
                 console.log(`Reporte generado: ${stdout}`);
-                resolve(outputFilePath+"."+ext);
+                resolve(outputFilePath + "." + ext);
             });
         });
     }
