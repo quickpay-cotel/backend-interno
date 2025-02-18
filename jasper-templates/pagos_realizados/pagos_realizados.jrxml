@@ -2,8 +2,9 @@
 <!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="pagos_realizados" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="459f1c08-482f-400d-89a6-b84f5a6ee4aa">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="PAGOS JSON"/>
+	<parameter name="P_filtros" class="java.lang.String"/>
 	<queryString language="JSON">
-		<![CDATA[servicio]]>
+		<![CDATA[]]>
 	</queryString>
 	<field name="contrato_telefono" class="java.lang.String">
 		<property name="net.sf.jasperreports.json.field.expression" value="contrato_telefono"/>
@@ -13,25 +14,21 @@
 		<property name="net.sf.jasperreports.json.field.expression" value="nombre_completo"/>
 		<fieldDescription><![CDATA[nombre_completo]]></fieldDescription>
 	</field>
-	<field name="numero_documento" class="java.lang.String">
-		<property name="net.sf.jasperreports.json.field.expression" value="numero_documento"/>
-		<fieldDescription><![CDATA[numero_documento]]></fieldDescription>
-	</field>
-	<field name="email" class="java.lang.String">
-		<property name="net.sf.jasperreports.json.field.expression" value="email"/>
-		<fieldDescription><![CDATA[email]]></fieldDescription>
-	</field>
 	<field name="servicio" class="java.lang.String">
 		<property name="net.sf.jasperreports.json.field.expression" value="servicio"/>
 		<fieldDescription><![CDATA[servicio]]></fieldDescription>
 	</field>
-	<field name="mensaje_deuda" class="java.lang.String">
-		<property name="net.sf.jasperreports.json.field.expression" value="mensaje_deuda"/>
-		<fieldDescription><![CDATA[mensaje_deuda]]></fieldDescription>
+	<field name="id_transaccion" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="id_transaccion"/>
+		<fieldDescription><![CDATA[id_transaccion]]></fieldDescription>
 	</field>
 	<field name="periodo" class="java.lang.String">
 		<property name="net.sf.jasperreports.json.field.expression" value="periodo"/>
 		<fieldDescription><![CDATA[periodo]]></fieldDescription>
+	</field>
+	<field name="codigo_deuda" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="codigo_deuda"/>
+		<fieldDescription><![CDATA[codigo_deuda]]></fieldDescription>
 	</field>
 	<field name="monto" class="java.lang.Float">
 		<property name="net.sf.jasperreports.json.field.expression" value="monto"/>
@@ -45,17 +42,25 @@
 		<property name="net.sf.jasperreports.json.field.expression" value="monto_final"/>
 		<fieldDescription><![CDATA[monto_final]]></fieldDescription>
 	</field>
+	<field name="mensaje_deuda" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="mensaje_deuda"/>
+		<fieldDescription><![CDATA[mensaje_deuda]]></fieldDescription>
+	</field>
+	<field name="mensaje_contrato" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="mensaje_contrato"/>
+		<fieldDescription><![CDATA[mensaje_contrato]]></fieldDescription>
+	</field>
+	<field name="numero_documento" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="numero_documento"/>
+		<fieldDescription><![CDATA[numero_documento]]></fieldDescription>
+	</field>
 	<field name="fecha_pago" class="java.lang.String">
 		<property name="net.sf.jasperreports.json.field.expression" value="fecha_pago"/>
 		<fieldDescription><![CDATA[fecha_pago]]></fieldDescription>
 	</field>
-	<field name="id_transaccion" class="java.lang.String">
-		<property name="net.sf.jasperreports.json.field.expression" value="id_transaccion"/>
-		<fieldDescription><![CDATA[id_transaccion]]></fieldDescription>
-	</field>
-	<field name="codigo_deuda" class="java.lang.String">
-		<property name="net.sf.jasperreports.json.field.expression" value="codigo_deuda"/>
-		<fieldDescription><![CDATA[codigo_deuda]]></fieldDescription>
+	<field name="email" class="java.lang.String">
+		<property name="net.sf.jasperreports.json.field.expression" value="email"/>
+		<fieldDescription><![CDATA[email]]></fieldDescription>
 	</field>
 	<field name="metodo_pago" class="java.lang.String">
 		<property name="net.sf.jasperreports.json.field.expression" value="metodo_pago"/>
@@ -84,9 +89,9 @@
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="70" splitType="Stretch">
+		<band height="86" splitType="Stretch">
 			<staticText>
-				<reportElement x="256" y="15" width="320" height="30" forecolor="#0D0404" uuid="25d61d29-62e3-45a6-938b-fa44e4fd560d"/>
+				<reportElement x="260" y="10" width="320" height="30" forecolor="#0D0404" uuid="25d61d29-62e3-45a6-938b-fa44e4fd560d"/>
 				<textElement textAlignment="Center">
 					<font size="20" isBold="true"/>
 				</textElement>
@@ -94,12 +99,17 @@
 			</staticText>
 			<image>
 				<reportElement x="0" y="0" width="110" height="60" uuid="5bfe51a0-eda4-4f1d-938a-7d82a06b3d4c"/>
-				<imageExpression><![CDATA["/cotel.png"]]></imageExpression>
+				<imageExpression><![CDATA["./cotel.png"]]></imageExpression>
 			</image>
 			<image>
 				<reportElement x="700" y="12" width="102" height="30" uuid="23e062d6-427d-4ed6-9845-29824e3ba3b8"/>
 				<imageExpression><![CDATA["./QuickPayLogo.png"]]></imageExpression>
 			</image>
+			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<reportElement stretchType="ContainerHeight" x="220" y="49" width="356" height="30" uuid="74957df0-000a-470f-89cc-092e598180b5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="html"/>
+				<textFieldExpression><![CDATA[$P{P_filtros}]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<columnHeader>
@@ -600,7 +610,7 @@
 			<textField evaluationTime="Report">
 				<reportElement x="770" y="10" width="32" height="30" uuid="4e61fd4c-d098-41a7-96bf-d6a93dd369c9"/>
 				<textElement textAlignment="Right"/>
-				<textFieldExpression><![CDATA[ " de " + $V{vTotalPaginas}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" de " + $V{vTotalPaginas}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="100" y="10" width="160" height="30" uuid="a21016d0-a58e-4795-8197-22a8ff56fc86"/>
