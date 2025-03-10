@@ -12,7 +12,7 @@ export class CotelTransacionesRepository {
     TO_CHAR(fecha_transaccion, 'YYYY-MM') AS mes,
     SUM(monto_pagado) AS total_pagado
 FROM cotel.transacciones
-WHERE estado_transaccion_id = 1010 
+WHERE estado_transaccion_id = 1013 
 GROUP BY mes
 ORDER BY mes DESC;`;
     const result = await this.db.manyOrNone(query);
@@ -23,7 +23,7 @@ ORDER BY mes DESC;`;
     DATE_TRUNC('week', fecha_transaccion) AS semana,
     SUM(monto_pagado) AS total_pagado
 FROM cotel.transacciones
-WHERE estado_transaccion_id = 1010 
+WHERE estado_transaccion_id = 1013 
 GROUP BY semana
 ORDER BY semana DESC;`;
     const result = await this.db.manyOrNone(query);
@@ -47,7 +47,7 @@ ORDER BY cantidad_transacciones DESC;`;
     moneda,
     fecha_transaccion
 FROM cotel.transacciones
-WHERE estado_transaccion_id = 1010 
+WHERE estado_transaccion_id = 1013 
 ORDER BY fecha_transaccion DESC
 LIMIT $1;`;
     const params = [pLimit];
