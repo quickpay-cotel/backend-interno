@@ -11,7 +11,7 @@ import { AuthController } from './auth.controller';
   imports: [
     JwtModule.register({
       global:true,
-      secret: 'tu_secreto_jwt_muy_seguro' ,
+      secret: 'ks3k@#8Ls!xv2PLD92jRzm$NfQ9gT7qW' ,
       signOptions: { expiresIn:'1h' },
     }),
     PassportModule,
