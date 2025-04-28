@@ -16,7 +16,7 @@ export class UsuarioController {
     );
   }
   @Get('get-options')
-  @UseGuards(JwtAuthGuard) // Protege el endpoint con el guardia JWT
+  //@UseGuards(JwtAuthGuard) // Protege el endpoint con el guardia JWT
   async getOptions(@Request() req) {
     return await this.usuariosService.getOptions(req.user.username);
   }
