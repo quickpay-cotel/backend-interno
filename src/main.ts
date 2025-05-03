@@ -5,6 +5,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { HttpExceptionFilter } from './common/interceptors/http-exception.filter';
 dotenv.config(); // Carga las variables de entorno
 import * as fs from 'fs';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   let app;
@@ -25,7 +26,9 @@ async function bootstrap() {
   app.enableCors();
   app.useGlobalInterceptors(new ResponseInterceptor()); // Para estandarizar las respuestas
   app.useGlobalFilters(new HttpExceptionFilter()); // Para las respuestas de error
-
+  // Habilitar validación global para los DTOs
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  
   const port = process.env.PORT || 3000;
   await app.listen(port);
   console.log(`Server running on ${process.env.NODE_ENV === 'production' ? 'HTTPS' : 'HTTP'} at port ${port}`);
