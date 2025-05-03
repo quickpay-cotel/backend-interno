@@ -4,7 +4,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { CotelDeudasRepository } from 'src/common/repository/cotel.deudas.repository';
 import { ConsultaPagosDto } from './dto/consulta-pagos.dto';
-
+import * as moment from 'moment';
 @Injectable()
 export class JasperService {
 
@@ -35,8 +35,9 @@ export class JasperService {
                 filtroString += `<li>${key} = ${value}</li>`;
             }
             filtroString += "</div>";*/
-
-            filtroString = `<div><strong>Periodo: ${consultaPagosDto.fechaInicioPago} - ${consultaPagosDto.fechaFinPago}</strong>`;
+            let fechaIni = moment(consultaPagosDto.fechaInicioPago, 'YYYY-MM-DD').format('DD/MM/YYYY');
+            let fechaFin = moment(consultaPagosDto.fechaFinPago, 'YYYY-MM-DD').format('DD/MM/YYYY');
+            filtroString = `<div><strong>Periodo: ${fechaIni} - ${fechaFin}</strong>`;
 
 
         }
