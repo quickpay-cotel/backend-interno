@@ -21,7 +21,9 @@ export class ConsultaPagosDto {
   @IsString()
   numeroDocumento: string;
   @IsString()
+  @IsNotEmpty()
   fechaInicioPago: Date;
   @IsString()
+  @IsNotEmpty()
   fechaFinPago: Date;
 }
