@@ -25,7 +25,8 @@ export class JasperService {
         if (!data.length) return;
         let filtroString ='';
         if (this.verificarAlgunCampoConValor(consultaPagosDto)) {
-            let filtros = Object.fromEntries(
+
+            /*let filtros = Object.fromEntries(
                 Object.entries(consultaPagosDto).filter(([key, value]) => value !== null && value !== "")
             );
             filtroString = "<div><strong>Filtros Aplicados:</strong>";
@@ -33,7 +34,11 @@ export class JasperService {
             for (const [key, value] of Object.entries(filtros)) {
                 filtroString += `<li>${key} = ${value}</li>`;
             }
-            filtroString += "</div>";
+            filtroString += "</div>";*/
+
+            filtroString = `<div><strong>Periodo: ${consultaPagosDto.fechaInicioPago} - ${consultaPagosDto.fechaFinPago}</strong>`;
+
+
         }
 
         console.log(filtroString);
