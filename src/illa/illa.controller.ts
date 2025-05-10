@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UseGuards,Request, Body, Res, Param } from "@nestjs/common";
+import { Controller, Get, Post, UseGuards, Request, Body, Res, Param } from "@nestjs/common";
 
 import * as fs from 'fs';
 import { IllaService } from "./illa.service";
@@ -8,6 +8,10 @@ export class IllaController {
   ) { }
   @Post("documentos-ajuste")
   async pagosRealizados(@Body() payload: any) {
-      return await this.illaService.notaConciliacion(payload);
+    return await this.illaService.notaConciliacion(payload);
+  }
+  @Get("obtiene-productos-todos")
+  async obtieneProductos() {
+    return await this.illaService.obtieneProductosTodos();
   }
 }
