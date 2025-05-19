@@ -70,13 +70,13 @@
 		<property name="net.sf.jasperreports.json.field.expression" value="entidad_cobro"/>
 		<fieldDescription><![CDATA[entidad_cobro]]></fieldDescription>
 	</field>
-	<variable name="vTotalMonto" class="java.lang.Float" calculation="Sum">
+	<variable name="vTotalMonto" class="java.math.BigDecimal" calculation="Sum">
 		<variableExpression><![CDATA[$F{monto}]]></variableExpression>
 	</variable>
-	<variable name="vTotalComisionQP" class="java.lang.Float" calculation="Sum">
+	<variable name="vTotalComisionQP" class="java.math.BigDecimal" calculation="Sum">
 		<variableExpression><![CDATA[$F{comision_qp}]]></variableExpression>
 	</variable>
-	<variable name="vTotalMontoFinal" class="java.lang.Float" calculation="Sum">
+	<variable name="vTotalMontoFinal" class="java.math.BigDecimal" calculation="Sum">
 		<variableExpression><![CDATA[$F{monto_final}]]></variableExpression>
 	</variable>
 	<variable name="vNumeroFila" class="java.lang.Integer" calculation="Count">
