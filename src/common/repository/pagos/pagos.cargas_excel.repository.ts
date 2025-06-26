@@ -1,10 +1,10 @@
-import { Injectable, Inject } from "@nestjs/common";
-import { IDatabase } from "pg-promise"; // Usamos pg-promise
+import { Injectable, Inject } from '@nestjs/common';
+import { IDatabase } from 'pg-promise'; // Usamos pg-promise
 @Injectable()
 export class PagosCargasExcelRepository {
   private db: IDatabase<any>;
 
-  constructor(@Inject("DB_CONNECTION") db: IDatabase<any>) {
+  constructor(@Inject('DB_CONNECTION') db: IDatabase<any>) {
     this.db = db; // Inyectamos la conexión de pg-promise
   }
   async create(data: Record<string, any>, t?: IDatabase<any>): Promise<any> {
@@ -12,10 +12,10 @@ export class PagosCargasExcelRepository {
     const columnas = Object.keys(data);
     const params = Object.values(data);
     // Construir los marcadores de posición ($1, $2, ...)
-    const marcadores = columnas.map((_, index) => `$${index + 1}`).join(", ");
+    const marcadores = columnas.map((_, index) => `$${index + 1}`).join(', ');
     // Crear la consulta SQL dinámica
     const query = `
-          INSERT INTO pagos.cargas_excel (${columnas.join(", ")})
+          INSERT INTO pagos.cargas_excel (${columnas.join(', ')})
           VALUES (${marcadores}) RETURNING *
         `;
     const result = t
@@ -23,4 +23,5 @@ export class PagosCargasExcelRepository {
       : await this.db.one(query, params);
     return result;
   }
+
 }

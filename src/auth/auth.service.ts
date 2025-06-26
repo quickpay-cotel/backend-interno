@@ -1,5 +1,5 @@
 import { BcryptService } from 'src/auth/bcrypt.service';
-import { UsuarioUsuariosRepository } from 'src/common/repository/usuario.usuarios.repository';
+import { UsuarioUsuariosRepository } from 'src/common/repository/usuario/usuario.usuarios.repository';
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 @Injectable()

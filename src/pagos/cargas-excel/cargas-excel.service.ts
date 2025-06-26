@@ -1,4 +1,10 @@
-import { BadRequestException, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import * as XLSX from 'xlsx';
 import * as fs from 'fs';
 import { PagosCargasExcelRepository } from 'src/common/repository/pagos/pagos.cargas_excel.repository';
@@ -8,19 +14,16 @@ import { DeudaExcelDto } from './dto/deuda-excel.dto';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 
-
 @Injectable()
 export class CargasExcelService {
   constructor(
     private readonly pagosCargasExcelRepository: PagosCargasExcelRepository,
     private readonly pagosDeudasRepository: PagosDeudasRepository,
-    @Inject("DB_CONNECTION") private db: IDatabase<any>,
-  ) { }
+    @Inject('DB_CONNECTION') private db: IDatabase<any>,
+  ) {}
 
-  async procesarExcel(file: Express.Multer.File) {
-
+  async procesarExcel(file: Express.Multer.File, usuarioId:number) {
     try {
-
       const workbook = XLSX.readFile(file.path);
       const sheetName = workbook.SheetNames[0];
 
@@ -29,21 +32,40 @@ export class CargasExcelService {
       //const rows = plainToInstance(DeudaExcelDto, rawRows);
 
       const rows: DeudaExcelDto[] = rawRows.map((row) => ({
-        codigoCliente: row['codigoCliente'] ? String(row['codigoCliente']) : null,
-        nombreCompleto: row['nombreCompleto'] ? String(row['nombreCompleto']) : null,
-        tipoDocumento: row['tipoDocumento'] ? String(row['tipoDocumento']) : null,
-        numeroDocumento: row['numeroDocumento'] ? String(row['numeroDocumento']) : null,
-        complemento_documento: row['complementoDocumento'] ? String(row['complementoDocumento']) : null,
+        codigoCliente: row['codigoCliente']
+          ? String(row['codigoCliente'])
+          : null,
+        nombreCompleto: row['nombreCompleto']
+          ? String(row['nombreCompleto'])
+          : null,
+        tipoDocumento: row['tipoDocumento']
+          ? String(row['tipoDocumento'])
+          : null,
+        numeroDocumento: row['numeroDocumento']
+          ? String(row['numeroDocumento'])
+          : null,
+        complemento_documento: row['complementoDocumento']
+          ? String(row['complementoDocumento'])
+          : null,
         tipoPagoId: row['tipoPagoId'] ? Number(row['tipoPagoId']) : null,
-        codigoServicio: row['codigoServicio'] ? String(row['codigoServicio']) : null,
-        descripcionServicio: row['descripcionServicio'] ? String(row['descripcionServicio']) : null,
+        codigoServicio: row['codigoServicio']
+          ? String(row['codigoServicio'])
+          : null,
+        descripcionServicio: row['descripcionServicio']
+          ? String(row['descripcionServicio'])
+          : null,
         periodo: row['periodo'] ? String(row['periodo']) : null,
-        monto: row['monto'] !== undefined && row['monto'] !== '' ? Number(row['monto']) : null,
-        monto_descuento: row['montoDescuento'] !== undefined && row['montoDescuento'] !== '' ? Number(row['montoDescuento']) : null,
+        monto:
+          row['monto'] !== undefined && row['monto'] !== ''
+            ? Number(row['monto'])
+            : null,
+        monto_descuento:
+          row['montoDescuento'] !== undefined && row['montoDescuento'] !== ''
+            ? Number(row['montoDescuento'])
+            : null,
         email: row['email'] ? String(row['email']) : null,
         telefono: row['telefono'] ? String(row['telefono']) : null,
       }));
-
 
       const errores: any[] = [];
 
@@ -55,17 +77,35 @@ export class CargasExcelService {
       }
 
       if (errores.length > 0) {
-        const erroresTexto = errores.map(error => {
-          const fila = error.fila;
-          const mensajes = error.errores.map((e: any) => Object.values(e.constraints).join(', ')).join(' | ');
-          return ` Fila ${fila}: ${mensajes}`;
-        }).join('\n');
-        throw new BadRequestException(`Errores de validación:\n${erroresTexto}`);
+        const erroresTexto = errores
+          .map((error) => {
+            const fila = error.fila;
+            const mensajes = error.errores
+              .map((e: any) => Object.values(e.constraints).join(', '))
+              .join(' | ');
+            return ` Fila ${fila}: ${mensajes}`;
+          })
+          .join('\n');
+        throw new BadRequestException(
+          `Errores de validación:\n${erroresTexto}`,
+        );
       }
 
+      let lstResgistroDuplicados = [];
+
+      for (const row of rows) {
+        const lstDeudas = await this.pagosDeudasRepository.findByTipoPagoAndPeriodo(row.tipoPagoId,row.periodo);
+        if (lstDeudas.length) {
+          lstResgistroDuplicados.push(...lstDeudas); // Desestructuramos para aplanar
+        }
+      }
+      if (lstResgistroDuplicados.length) {
+        const texto = lstResgistroDuplicados.map((d) => `TipoPago: ${d.tipo_pago_id}, Periodo: ${d.periodo}`).join('\n');
+        throw new BadRequestException(`Se han encontrado las siguientes deudas ya registradas:\n${texto}`);
+      }
       // 1. Guardar registro de carga
       let carga = await this.pagosCargasExcelRepository.create({
-        usuario_id: 1, // segu auth
+        usuario_id: usuarioId, // segu auth
         archivo_nombre: file.originalname,
         ruta_archivo: file.path,
         estado_id: 1000,
@@ -89,10 +129,8 @@ export class CargasExcelService {
           telefono: row.telefono,
           estado_id: 1000,
         });
-
       }
       return carga;
-
     } catch (error) {
       throw new HttpException(error, HttpStatus.NOT_FOUND);
     }
