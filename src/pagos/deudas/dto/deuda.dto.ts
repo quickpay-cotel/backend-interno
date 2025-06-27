@@ -1,5 +1,6 @@
 // deuda.dto.ts
 export class DeudaDto {
+  deudaId: number;
   codigoCliente: string;
   nombreCompleto: string;
   tipoDocumento: string;

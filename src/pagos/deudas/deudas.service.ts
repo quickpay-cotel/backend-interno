@@ -14,6 +14,7 @@ export class DeudasService {
       const deudas = await this.pagosDeudasRepository.findAllDeudasByUsuarioId(usuarioId);
       
       return deudas.map(obj => ({
+        deudaId:obj.deuda_id,
         codigoCliente: obj.codigo_cliente,
         nombreCompleto: obj.nombre_completo,
         tipoDocumento: obj.tipo_documento,
@@ -33,4 +34,12 @@ export class DeudasService {
       throw new HttpException('No se pudieron obtener las deudas.', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+  async anularDeuda(usuarioId: number, deudaId: number) {
+    try {
+      this.pagosDeudasRepository.update(deudaId, { estado_id: 1001 });
+    } catch (error) {
+      throw new HttpException('No se pudieron anulas las deudas', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  
 }
