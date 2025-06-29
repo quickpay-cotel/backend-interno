@@ -57,10 +57,15 @@ export class PagosDeudasRepository {
     return result;
   }
   async findAllDeudasByUsuarioId(pUsuarioId: number) {
-    const query = `select d.* from pagos.deudas d 
+    const query = `select d.deuda_id,d.codigo_cliente,d.nombre_completo,d.tipo_documento,d.numero_documento,
+    d.complemento_documento,d.tipo_pago_id ,tipoPago.descripcion as tipo_pago ,d.codigo_servicio,d.descripcion_servicio,
+    d.periodo,d.monto ,d.monto_descuento,d.email,d.telefono,d.fecha_registro
+    from pagos.deudas d 
     inner join pagos.cargas_excel ce on d.carga_id = ce.carga_id and ce.estado_id = 1000
-    where d.estado_id = 1000 and ce.usuario_id = $1
-    order by d.fecha_registro desc;`;
+    inner join pagos.dominios tipoPago on tipoPago.dominio_id = d.tipo_pago_id 
+    where d.estado_id = 1000  and ce.usuario_id = $1
+    order by d.fecha_registro desc;
+    `;
     const params = [pUsuarioId];
     const result = await this.db.manyOrNone(query, params);
     return result;
