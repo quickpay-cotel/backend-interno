@@ -6,10 +6,10 @@ import { FuncionesFechas } from '../../common/utils/funciones.fechas';
 import { DatosClienteResponseDto } from './dto/response/datos-cliente-response.dto';
 
 @Injectable()
-export class DeudasService {
+export class CobrosPendientesService {
   constructor(private readonly pagosDeudasRepository: PagosDeudasRepository) {}
 
-  async deudasTodos(usuarioId: number): Promise<DeudaResponseDto[]> {
+  async cobrosPendientesByUsuarioId(usuarioId: number): Promise<DeudaResponseDto[]> {
     try {
       const deudas = await this.pagosDeudasRepository.findAllDeudasByUsuarioId(usuarioId);
 
@@ -67,5 +67,4 @@ export class DeudasService {
       throw new HttpException('No se pudieron modificar las deudas', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-
 }

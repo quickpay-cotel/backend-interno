@@ -20,17 +20,26 @@ export class DeudaExcelDto {
   @IsNumber()
   tipoPagoId: number;
 
-  @IsString()
-  codigoServicio: string;
-
-  @IsString()
-  descripcionServicio: string;
-
-  @IsString()
+    @IsString()
   periodo?: string;
+  
+  @IsString()
+  codigoProducto: string;
+
+  @IsString()
+  codigoProductoSin: string; // debe ser solo numeross asi es en SIAT
+  
+
+  @IsString()
+  descripcion: string;
 
   @IsNumber()
-  monto: number;
+  cantidad: number;
+
+
+
+  @IsNumber()
+  precioUnitario: number;
 
   @IsOptional()
   @IsNumber()

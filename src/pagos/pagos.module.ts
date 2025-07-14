@@ -8,10 +8,16 @@ import { DeudasController } from "./deudas/deudas.controller";
 import { DeudasService } from "./deudas/deudas.service";
 import { DominiosController } from "./dominios/dominios.controller";
 import { DominioService } from "./dominios/dominios.service";
+import { ExternalServiceModule } from "src/common/external-services/external-service.module";
+import { CobrosPendientesController } from "./deudas/cobros_pendientes.controller";
+import { CobrosPendientesService } from "./deudas/cobros_pendientes.service";
+import { CobrosCajaController } from "./deudas/cobros_caja.controller";
+import { CobrosCajaService } from "./deudas/cobros_caja.service";
+
 @Module({
-    imports: [RepositoryModule,AuthModule],
-    controllers: [CargasExcelController, DeudasController, DominiosController],
-    providers: [CargasExcelService, DeudasService, DominioService],
+    imports: [RepositoryModule,AuthModule,ExternalServiceModule],
+    controllers: [CargasExcelController, DeudasController, DominiosController,CobrosPendientesController,CobrosCajaController],
+    providers: [CargasExcelService, DeudasService, DominioService,CobrosPendientesService,CobrosCajaService],
     exports: []
 })
 export class PagosModule { }

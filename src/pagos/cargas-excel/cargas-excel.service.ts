@@ -29,40 +29,23 @@ export class CargasExcelService {
 
       const rawRows = XLSX.utils.sheet_to_json<any>(workbook.Sheets[sheetName]);
 
-      //const rows = plainToInstance(DeudaExcelDto, rawRows);
+
+
 
       const rows: DeudaExcelDto[] = rawRows.map((row) => ({
-        codigoCliente: row['codigoCliente']
-          ? String(row['codigoCliente'])
-          : null,
-        nombreCompleto: row['nombreCompleto']
-          ? String(row['nombreCompleto'])
-          : null,
-        tipoDocumento: row['tipoDocumento']
-          ? String(row['tipoDocumento'])
-          : null,
-        numeroDocumento: row['numeroDocumento']
-          ? String(row['numeroDocumento'])
-          : null,
-        complemento_documento: row['complementoDocumento']
-          ? String(row['complementoDocumento'])
-          : null,
+        codigoCliente: row['codigoCliente']? String(row['codigoCliente']): null,
+        nombreCompleto: row['nombreCompleto']? String(row['nombreCompleto']): null,
+        tipoDocumento: row['tipoDocumento']? String(row['tipoDocumento']): null,
+        numeroDocumento: row['numeroDocumento']? String(row['numeroDocumento']): null,
+        complemento_documento: row['complementoDocumento']? String(row['complementoDocumento']): null,
         tipoPagoId: row['tipoPagoId'] ? Number(row['tipoPagoId']) : null,
-        codigoServicio: row['codigoServicio']
-          ? String(row['codigoServicio'])
-          : null,
-        descripcionServicio: row['descripcionServicio']
-          ? String(row['descripcionServicio'])
-          : null,
         periodo: row['periodo'] ? String(row['periodo']) : null,
-        monto:
-          row['monto'] !== undefined && row['monto'] !== ''
-            ? Number(row['monto'])
-            : null,
-        monto_descuento:
-          row['montoDescuento'] !== undefined && row['montoDescuento'] !== ''
-            ? Number(row['montoDescuento'])
-            : null,
+        codigoProducto: row['codigoProducto']? String(row['codigoProducto']): null,
+        codigoProductoSin: row['codigoProductoSin']? String(row['codigoProductoSin']): null,
+        descripcion: row['descripcion']? String(row['descripcion']): null,
+        cantidad:row['cantidad'] !== undefined && row['cantidad'] !== ''? Number(row['cantidad']): null,
+        precioUnitario:row['precioUnitario'] !== undefined && row['precioUnitario'] !== ''? Number(row['precioUnitario']): null,
+        montoDescuento:row['montoDescuento'] !== undefined && row['montoDescuento'] !== ''? Number(row['montoDescuento']): null,
         email: row['email'] ? String(row['email']) : null,
         telefono: row['telefono'] ? String(row['telefono']) : null,
       }));
@@ -120,10 +103,12 @@ export class CargasExcelService {
           numero_documento: row.numeroDocumento,
           complemento_documento: row.complementoDocumento,
           tipo_pago_id: row.tipoPagoId,
-          codigo_servicio: row.codigoServicio,
-          descripcion_servicio: row.descripcionServicio,
           periodo: row.periodo,
-          monto: row.monto,
+          codigo_producto: row.codigoProducto,
+          codigo_producto_sin: row.codigoProductoSin,
+          descripcion: row.descripcion,
+          cantidad: row.cantidad,
+          precio_unitario: row.precioUnitario,
           monto_descuento: row.montoDescuento,
           email: row.email,
           telefono: row.telefono,

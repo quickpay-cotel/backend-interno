@@ -7,11 +7,14 @@ export class DeudaResponseDto {
   complementoDocumento: string;
   tipoPagoId: number;
   tipoPago: string;
-  codigoServicio: string;
-  descripcionServicio: string;
   periodo: string;
-  monto: number;
+  codigoProducto: string;
+  codigoProductoSin: string;
+  descripcion: string;
+  cantidad: number;
+  precioUnitario: number;
   montoDescuento: number;
+  montoTotal: number;
   email: string;
   telefono: string;
   fechaRegistro: string;

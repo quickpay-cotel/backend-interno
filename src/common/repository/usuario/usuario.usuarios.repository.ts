@@ -8,10 +8,40 @@ export class UsuarioUsuariosRepository {
     this.db = db; // Inyectamos la conexión de pg-promise
   }
 
+  async findByFilters(
+    filters: Record<string, any>,
+    t?: IDatabase<any>,
+  ): Promise<any[]> {
+    const keys = Object.keys(filters);
+    const values = Object.values(filters);
+
+    // Si no hay filtros, devolver todo
+    let whereClause = '';
+    if (keys.length > 0) {
+      const conditions = keys.map((key, index) => `${key} = $${index + 1}`);
+      whereClause = `WHERE ${conditions.join(' AND ')}`;
+    }
+
+    const query = `
+    SELECT * FROM usuario.usuarios
+    ${whereClause}
+  `;
+
+    const result = t
+      ? await t.any(query, values)
+      : await this.db.any(query, values);
+
+    return result;
+  }
   async findByUsername(username: string) {
     const query =
       'select * from usuario.usuarios where username=$1 and estado_id = 1000';
     return await this.db.oneOrNone(query, [username]);
+  }
+    async findByUsuarioId(usuarioId: Number) {
+    const query =
+      'select * from usuario.usuarios where usuario_id=$1 and estado_id = 1000';
+    return await this.db.oneOrNone(query, [usuarioId]);
   }
   async updateToken(usuario_id: number, token: string) {
     const query =

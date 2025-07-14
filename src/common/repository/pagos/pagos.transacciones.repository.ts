@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { IDatabase } from 'pg-promise'; // Usamos pg-promise
 @Injectable()
-export class UsuarioEmpresaConfiguracionRepository {
+export class PagosTransaccionesRepository {
   private db: IDatabase<any>;
 
   constructor(@Inject('DB_CONNECTION') db: IDatabase<any>) {
@@ -15,7 +15,7 @@ export class UsuarioEmpresaConfiguracionRepository {
     const marcadores = columnas.map((_, index) => `$${index + 1}`).join(', ');
     // Crear la consulta SQL dinámica
     const query = `
-          INSERT INTO usuario.empresa_configuracion (${columnas.join(', ')})
+          INSERT INTO pagos.transacciones (${columnas.join(', ')})
           VALUES (${marcadores}) RETURNING *
         `;
     const result = t
@@ -42,9 +42,9 @@ export class UsuarioEmpresaConfiguracionRepository {
 
     // Último parámetro es el ID
     const query = `
-    UPDATE usuario.empresa_configuracion
+    UPDATE pagos.transacciones
     SET ${setClause}
-    WHERE empresa_configuracion_id = $${columnas.length + 1}
+    WHERE deuda_id = $${columnas.length + 1}
     RETURNING *
   `;
 
@@ -72,7 +72,7 @@ export class UsuarioEmpresaConfiguracionRepository {
     }
 
     const query = `
-    SELECT * FROM usuario.empresa_configuracion
+    SELECT * FROM pagos.transacciones
     ${whereClause}
   `;
 
@@ -82,9 +82,16 @@ export class UsuarioEmpresaConfiguracionRepository {
 
     return result;
   }
-  async findByPersonaJuridica(personaJuridicaId: number) {
-    const query =
-      'select * from usuario.empresa_configuracion where persona_juridica_id = $1 and estado_id = 1000';
-    return await this.db.oneOrNone(query, [personaJuridicaId]);
+
+  async findByDeudasIds(deudasIds: number[]) {
+    if (!deudasIds.length) return []; // evita consulta vacía
+    const query = `
+    SELECT t.*
+    FROM pagos.transaccion_deuda td
+    INNER JOIN pagos.transacciones t ON t.transaccion_id = td.transaccion_id AND t.estado_id = 1000
+    WHERE td.deuda_id IN ($1:csv) AND td.estado_id = 1000
+  `;
+    const result = await this.db.manyOrNone(query, [deudasIds]);
+    return result;
   }
 }

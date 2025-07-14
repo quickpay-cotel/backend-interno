@@ -40,6 +40,11 @@ export class UsuarioController {
   async obtenerDatosPersona(@Request() req) {
     return await this.usuariosService.obtenerDatosPersonaEmpresa(req.user.sub);
   }
+  @Get('obtener-configuracion-empresa')
+  @UseGuards(JwtAuthGuard) // Protege el endpoint con el guardia JWT
+  async obtenerConfiguracionEmprsa(@Request() req) {
+    return await this.usuariosService.obtenerConfiguracionEmpresa(req.user.sub);
+  }
   @Post('upload-logo')
   @UseGuards(JwtAuthGuard) // Protege el endpoint con el guardia JWT
   @UseInterceptors(
@@ -61,11 +66,15 @@ export class UsuarioController {
     return await this.usuariosService.actualizarLogo(req.user.username, file);
   }
 
-  @Post('guardar-color')
+  @Post('guardar-color-primario')
   @UseGuards(JwtAuthGuard)
-  async guardarColor(@Body() body: { color: string }, @Request() req: any) {
-    await this.usuariosService.actualizarColor(body.color, req.user.username);
-    return { success: true };
+  async guardarColorPrimario(@Body() body: { color: string }, @Request() req: any) {
+    return await this.usuariosService.actualizarColorPrimario(body.color, req.user.username);
+  }
+  @Post('guardar-color-secundario')
+  @UseGuards(JwtAuthGuard)
+  async guardarColorSecundario(@Body() body: { color: string }, @Request() req: any) {
+    return await this.usuariosService.actualizarColorSecundario(body.color, req.user.username);
   }
   @Post('guardar-slug-empresa')
   @UseGuards(JwtAuthGuard)
