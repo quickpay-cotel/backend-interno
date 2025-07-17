@@ -11,7 +11,7 @@ import { PagosTransaccionesRepository } from 'src/common/repository/pagos/pagos.
 export class CobrosRealizadoService {
   constructor(private readonly pagosTransaccionesRepository: PagosTransaccionesRepository) {}
   async findCobrosRealizados(usuarioId:number,cobrosRealizadoDto: CobrosRealizadoDto) {
-    return await this.pagosTransaccionesRepository.findCobrosRealizados( cobrosRealizadoDto.fechaInicioPago, cobrosRealizadoDto.fechaFinPago
+    return await this.pagosTransaccionesRepository.findCobrosRealizados( usuarioId,cobrosRealizadoDto.fechaInicioPago, cobrosRealizadoDto.fechaFinPago
     );
   }
 }

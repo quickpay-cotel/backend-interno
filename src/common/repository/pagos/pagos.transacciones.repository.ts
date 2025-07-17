@@ -96,7 +96,7 @@ export class PagosTransaccionesRepository {
   }
 
   
-  async findCobrosRealizados( fechaInicioPago: Date, fechaFinPago: Date
+  async findCobrosRealizados( usuarioId:Number,fechaInicioPago: Date, fechaFinPago: Date
   ) {
     // Función auxiliar para convertir valores vacíos a null
     const toNull = (value: any) => {
@@ -106,9 +106,9 @@ export class PagosTransaccionesRepository {
     };
 
     //console.log(pNombreCompleto,servicio,idTransaccion,periodo,codigoDeuda,mensajeDeuda,mensajeContrato,tipoDocumento,numeroDocumento,fechaInicioPago,fechaFinPago);
-    const params = [toNull(fechaInicioPago), toNull(fechaFinPago)
+    const params = [usuarioId,toNull(fechaInicioPago), toNull(fechaFinPago)
     ];
-    const query = `select * from  pagos.fn_deudas_cobrados($1,$2);`;
+    const query = `select * from  pagos.fn_deudas_cobrados($1,$2,$3);`;
     return await this.db.manyOrNone(query, params);
   }
 }
