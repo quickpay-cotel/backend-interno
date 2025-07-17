@@ -10,7 +10,7 @@ import {
   Body,
 } from '@nestjs/common';
 
-import { DeudasService } from './deudas.service';
+
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { DeudaRequestDto } from './dto/request/deuda-request.dto';
 import { ConsultaDeudaRequestDto } from './dto/request/consulta-deuda-request.dto';

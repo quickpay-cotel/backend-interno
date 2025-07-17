@@ -94,4 +94,23 @@ export class PagosTransaccionesRepository {
     const result = await this.db.manyOrNone(query, [deudasIds]);
     return result;
   }
+
+  
+  async findCobrosRealizados( fechaInicioPago: Date, fechaFinPago: Date
+  ) {
+    // Función auxiliar para convertir valores vacíos a null
+    const toNull = (value: any) => {
+      // Usamos trim() antes de hacer la comparación
+      const trimmedValue = typeof value === 'string' ? value.trim() : value;
+      return (trimmedValue === "" || trimmedValue === undefined ? null : trimmedValue);
+    };
+
+    //console.log(pNombreCompleto,servicio,idTransaccion,periodo,codigoDeuda,mensajeDeuda,mensajeContrato,tipoDocumento,numeroDocumento,fechaInicioPago,fechaFinPago);
+    const params = [toNull(fechaInicioPago), toNull(fechaFinPago)
+    ];
+    const query = `select * from  pagos.fn_deudas_cobrados($1,$2);`;
+    return await this.db.manyOrNone(query, params);
+  }
 }
+
+
