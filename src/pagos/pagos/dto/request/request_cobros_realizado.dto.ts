@@ -1,7 +1,7 @@
-import { CobrosRealizadoController } from './../../cobros_realizado.controller';
+import { CobrosRealizadoController } from '../../cobros_realizado.controller';
 import { IsNotEmpty, IsString } from "class-validator";
 
-export class CobrosRealizadoDto {
+export class RequestCobrosRealizadoDto {
   @IsString()
   @IsNotEmpty()
   fechaInicioPago: Date;

@@ -9,9 +9,9 @@ import { DatosClienteResponseDto } from './dto/response/datos-cliente-response.d
 export class CobrosPendientesService {
   constructor(private readonly pagosDeudasRepository: PagosDeudasRepository) {}
 
-  async cobrosPendientesByUsuarioId(usuarioId: number): Promise<DeudaResponseDto[]> {
+  async cobrosPendienteEmpresaByUsuarioId(usuarioId: number): Promise<DeudaResponseDto[]> {
     try {
-      const deudas = await this.pagosDeudasRepository.findAllDeudasByUsuarioId(usuarioId);
+      const deudas = await this.pagosDeudasRepository.findAllDeudasEmpresaByUsuarioId(usuarioId);
 
       return deudas.map((obj) => ({
         deudaId: obj.deuda_id,

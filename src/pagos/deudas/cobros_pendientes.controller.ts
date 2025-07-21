@@ -21,10 +21,10 @@ export class CobrosPendientesController {
   constructor(private readonly cobrosPendientesService: CobrosPendientesService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Post('deudas-por-usuario')
+  @Post('cobros-pendiente-empresa-por-usuario')
   async deudasCargados(@Request() req) {
     const usuarioId = req.user.sub;
-    return this.cobrosPendientesService.cobrosPendientesByUsuarioId(usuarioId);
+    return this.cobrosPendientesService.cobrosPendienteEmpresaByUsuarioId(usuarioId);
   }
   @UseGuards(JwtAuthGuard)
   @Delete('anular-deuda/:deudaId')

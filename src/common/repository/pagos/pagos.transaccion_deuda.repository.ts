@@ -44,7 +44,7 @@ export class PagosTransaccionDeudaRepository {
     const query = `
     UPDATE pagos.transaccion_deuda
     SET ${setClause}
-    WHERE deuda_id = $${columnas.length + 1}
+    WHERE transaccion_deuda_id = $${columnas.length + 1}
     RETURNING *
   `;
 

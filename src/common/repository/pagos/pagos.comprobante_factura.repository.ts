@@ -7,7 +7,7 @@ export class PagosComprobanteFacturaRepository {
   constructor(@Inject('DB_CONNECTION') db: IDatabase<any>) {
     this.db = db; // Inyectamos la conexión de pg-promise
   }
-  async create(data: Record<string, any>, t?: IDatabase<any>): Promise<any> {
+  async  create(data: Record<string, any>, t?: IDatabase<any>): Promise<any> {
     // Extraer los nombres de las columnas y los valores
     const columnas = Object.keys(data);
     const params = Object.values(data);
@@ -44,7 +44,7 @@ export class PagosComprobanteFacturaRepository {
     const query = `
     UPDATE pagos.comprobante_factura
     SET ${setClause}
-    WHERE deuda_id = $${columnas.length + 1}
+    WHERE comprobante_factura = $${columnas.length + 1}
     RETURNING *
   `;
 

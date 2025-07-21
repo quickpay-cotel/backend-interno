@@ -4,13 +4,13 @@ import { PagosDeudasRepository } from 'src/common/repository/pagos/pagos.deudas.
 import { DeudaResponseDto } from '../deudas/dto/response/deuda-response.dto';
 import { FuncionesFechas } from '../../common/utils/funciones.fechas';
 import { DatosClienteResponseDto } from '../deudas/dto/response/datos-cliente-response.dto';
-import { CobrosRealizadoDto } from './dto/request/cobros_realizado.dto';
+import { RequestCobrosRealizadoDto } from './dto/request/request_cobros_realizado.dto';
 import { PagosTransaccionesRepository } from 'src/common/repository/pagos/pagos.transacciones.repository';
 
 @Injectable()
 export class CobrosRealizadoService {
   constructor(private readonly pagosTransaccionesRepository: PagosTransaccionesRepository) {}
-  async findCobrosRealizados(usuarioId:number,cobrosRealizadoDto: CobrosRealizadoDto) {
+  async findCobrosRealizados(usuarioId:number,cobrosRealizadoDto: RequestCobrosRealizadoDto) {
     return await this.pagosTransaccionesRepository.findCobrosRealizados( usuarioId,cobrosRealizadoDto.fechaInicioPago, cobrosRealizadoDto.fechaFinPago
     );
   }

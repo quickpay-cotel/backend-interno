@@ -1,13 +1,13 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { IDatabase } from 'pg-promise'; // Usamos pg-promise
 @Injectable()
-export class PagosTransaccionesRepository {
+export class PagosComprobanteReciboRepository {
   private db: IDatabase<any>;
 
   constructor(@Inject('DB_CONNECTION') db: IDatabase<any>) {
     this.db = db; // Inyectamos la conexión de pg-promise
   }
-  async create(data: Record<string, any>, t?: IDatabase<any>): Promise<any> {
+  async  create(data: Record<string, any>, t?: IDatabase<any>): Promise<any> {
     // Extraer los nombres de las columnas y los valores
     const columnas = Object.keys(data);
     const params = Object.values(data);
@@ -15,7 +15,7 @@ export class PagosTransaccionesRepository {
     const marcadores = columnas.map((_, index) => `$${index + 1}`).join(', ');
     // Crear la consulta SQL dinámica
     const query = `
-          INSERT INTO pagos.transacciones (${columnas.join(', ')})
+          INSERT INTO pagos.comprobante_recibo (${columnas.join(', ')})
           VALUES (${marcadores}) RETURNING *
         `;
     const result = t
@@ -42,9 +42,9 @@ export class PagosTransaccionesRepository {
 
     // Último parámetro es el ID
     const query = `
-    UPDATE pagos.transacciones
+    UPDATE pagos.comprobante_recibo
     SET ${setClause}
-    WHERE transaccion_id = $${columnas.length + 1}
+    WHERE comprobante_recibo = $${columnas.length + 1}
     RETURNING *
   `;
 
@@ -72,7 +72,7 @@ export class PagosTransaccionesRepository {
     }
 
     const query = `
-    SELECT * FROM pagos.transacciones
+    SELECT * FROM pagos.comprobante_factura
     ${whereClause}
   `;
 
@@ -83,34 +83,4 @@ export class PagosTransaccionesRepository {
     return result;
   }
 
-  async findByDeudasIds(deudasIds: number[]) {
-    if (!deudasIds.length) return []; // evita consulta vacía
-    const query = `
-    SELECT t.*
-    FROM pagos.transaccion_deuda td
-    INNER JOIN pagos.transacciones t ON t.transaccion_id = td.transaccion_id AND t.estado_id = 1000
-    WHERE td.deuda_id IN ($1:csv) AND td.estado_id = 1000
-  `;
-    const result = await this.db.manyOrNone(query, [deudasIds]);
-    return result;
-  }
-
-  
-  async findCobrosRealizados( usuarioId:Number,fechaInicioPago: Date, fechaFinPago: Date
-  ) {
-    // Función auxiliar para convertir valores vacíos a null
-    const toNull = (value: any) => {
-      // Usamos trim() antes de hacer la comparación
-      const trimmedValue = typeof value === 'string' ? value.trim() : value;
-      return (trimmedValue === "" || trimmedValue === undefined ? null : trimmedValue);
-    };
-
-    //console.log(pNombreCompleto,servicio,idTransaccion,periodo,codigoDeuda,mensajeDeuda,mensajeContrato,tipoDocumento,numeroDocumento,fechaInicioPago,fechaFinPago);
-    const params = [usuarioId,toNull(fechaInicioPago), toNull(fechaFinPago)
-    ];
-    const query = `select * from  pagos.fn_deudas_cobrados($1,$2,$3);`;
-    return await this.db.manyOrNone(query, params);
-  }
 }
-
-

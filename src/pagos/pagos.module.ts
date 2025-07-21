@@ -14,11 +14,13 @@ import { CobrosCajaController } from "./deudas/cobros_caja.controller";
 import { CobrosCajaService } from "./deudas/cobros_caja.service";
 import { CobrosRealizadoController } from "./pagos/cobros_realizado.controller";
 import { CobrosRealizadoService } from "./pagos/cobros_realizado.service";
+import { ReportesJasperController } from "./pagos/reportes_jasper.controller";
+import { ReportesJasperService } from "./pagos/reportes_jasper.service";
 
 @Module({
     imports: [RepositoryModule,AuthModule,ExternalServiceModule],
-    controllers: [CargasExcelController, DominiosController,CobrosPendientesController,CobrosCajaController, CobrosRealizadoController],
-    providers: [CargasExcelService, DominioService,CobrosPendientesService,CobrosCajaService,CobrosRealizadoService],
+    controllers: [CargasExcelController, DominiosController,CobrosPendientesController,CobrosCajaController, CobrosRealizadoController,ReportesJasperController],
+    providers: [CargasExcelService, DominioService,CobrosPendientesService,CobrosCajaService,CobrosRealizadoService,ReportesJasperService],
     exports: []
 })
 export class PagosModule { }

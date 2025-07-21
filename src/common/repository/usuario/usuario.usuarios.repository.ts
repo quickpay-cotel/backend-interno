@@ -78,7 +78,7 @@ export class UsuarioUsuariosRepository {
 
   async findDatosPersonaAndEmpresa(usuarioId: number) {
     const query = ` select pn.nombres as nombre_usuario, pn.apellidos as apellido_usuario,pj.nombre_empresa, pj.nit as nit_empresa, u.email as correo_usuario,
-ec.logo_url as logo_filename , ec.color_primario ,ec.slug_empresa
+ec.logo_url as logo_filename ,ec.logo_base64, ec.color_primario ,ec.slug_empresa
     from usuario.usuarios u 
     inner join usuario.persona_natural pn on pn.persona_natural_id = u.persona_natural_id and pn.estado_id = 1000
     left join usuario.persona_juridica pj on pj.persona_juridica_id = u.persona_juridica_id and pj.estado_id = 1000
