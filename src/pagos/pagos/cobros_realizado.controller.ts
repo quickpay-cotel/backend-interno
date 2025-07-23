@@ -9,8 +9,8 @@ export class CobrosRealizadoController {
   @Post('cobros-realizado')
   @UseGuards(JwtAuthGuard) // Protege el endpoint con el guardia JWT
   async pagosRealizados(@Request() req,@Body() cobrosRealizadoDto: RequestCobrosRealizadoDto) {
-    const usuarioId = req.user.sub;
-    return await this.cobrosRealizadoService.findCobrosRealizados(usuarioId,cobrosRealizadoDto);
+    const personaJuridicaId = req.user.datosPersona.persona_juridica_id;
+    return await this.cobrosRealizadoService.findCobrosRealizados(personaJuridicaId,cobrosRealizadoDto);
   }
 
   

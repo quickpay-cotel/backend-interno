@@ -10,8 +10,8 @@ import { PagosTransaccionesRepository } from 'src/common/repository/pagos/pagos.
 @Injectable()
 export class CobrosRealizadoService {
   constructor(private readonly pagosTransaccionesRepository: PagosTransaccionesRepository) {}
-  async findCobrosRealizados(usuarioId:number,cobrosRealizadoDto: RequestCobrosRealizadoDto) {
-    return await this.pagosTransaccionesRepository.findCobrosRealizados( usuarioId,cobrosRealizadoDto.fechaInicioPago, cobrosRealizadoDto.fechaFinPago
+  async findCobrosRealizados(personaJuridicaId:number,cobrosRealizadoDto: RequestCobrosRealizadoDto) {
+    return await this.pagosTransaccionesRepository.findCobrosRealizados( personaJuridicaId,cobrosRealizadoDto.fechaInicioPago, cobrosRealizadoDto.fechaFinPago
     );
   }
 }
