@@ -9,9 +9,9 @@ import { DatosClienteResponseDto } from './dto/response/datos-cliente-response.d
 export class CobrosPendientesService {
   constructor(private readonly pagosDeudasRepository: PagosDeudasRepository) {}
 
-  async cobrosPendienteEmpresaByUsuarioId(usuarioId: number): Promise<DeudaResponseDto[]> {
+  async cobrosPendienteEmpresaByPersonaJuridicaId(personaJuridicaId: number): Promise<DeudaResponseDto[]> {
     try {
-      const deudas = await this.pagosDeudasRepository.findAllDeudasEmpresaByUsuarioId(usuarioId);
+      const deudas = await this.pagosDeudasRepository.findCobrosPendienteEmpresaByPersonaJuridicaId(personaJuridicaId);
 
       return deudas.map((obj) => ({
         deudaId: obj.deuda_id,
@@ -27,11 +27,12 @@ export class CobrosPendientesService {
         codigoProductoSin: obj.codigo_producto_sin,
         descripcion: obj.descripcion,
         cantidad: obj.cantidad,
-        precioUnitario: obj.precio_unitario,
+        precioUnitario: obj.precio_unitario??0,
         montoDescuento: obj.monto_descuento ?? 0,
-        montoTotal: (parseFloat(obj.precio_unitario) * parseFloat(obj.cantidad ?? 1)) - parseFloat(obj.monto_descuento ?? 0),
+        montoTotal: obj.monto_total??0,
         email: obj.email,
         telefono: obj.telefono,
+        generaFactura:obj.genera_factura,
         fechaRegistro: FuncionesFechas.formatDateToDDMMYYYY(obj.fecha_registro),
       }));
     } catch (error) {

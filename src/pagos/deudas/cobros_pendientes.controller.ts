@@ -13,7 +13,6 @@ import {
 
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { DeudaRequestDto } from './dto/request/deuda-request.dto';
-import { ConsultaDeudaRequestDto } from './dto/request/consulta-deuda-request.dto';
 import { CobrosPendientesService } from './cobros_pendientes.service';
 
 @Controller('cobros-pendientes')
@@ -21,10 +20,10 @@ export class CobrosPendientesController {
   constructor(private readonly cobrosPendientesService: CobrosPendientesService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Post('cobros-pendiente-empresa-por-usuario')
+  @Post('cobros-pendiente-by-persona_juridica')
   async deudasCargados(@Request() req) {
-    const usuarioId = req.user.sub;
-    return this.cobrosPendientesService.cobrosPendienteEmpresaByUsuarioId(usuarioId);
+    const persona_juridica_id = req.user.datosPersona.persona_juridica_id;
+    return this.cobrosPendientesService.cobrosPendienteEmpresaByPersonaJuridicaId(persona_juridica_id);
   }
   @UseGuards(JwtAuthGuard)
   @Delete('anular-deuda/:deudaId')

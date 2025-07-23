@@ -15,14 +15,15 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 @Controller('cargas-excel')
 export class CargasExcelController {
   constructor(private readonly cargasExcelService: CargasExcelService) {}
-
+ 
   @Post('upload')
-  @UseGuards(JwtAuthGuard) // Protege el endpoint con el guardia JWT
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          cb(null, path.join(process.cwd(), 'store', 'deudas'));
+          const fullPath = path.join(process.env.STATIC_FILES_PATH, 'deudas');
+          cb(null, fullPath);
         },
         filename: (req, file, cb) => {
           const filename = `${Date.now()}-${file.originalname}`;
@@ -35,7 +36,8 @@ export class CargasExcelController {
     @UploadedFile() file: Express.Multer.File,
     @Request() req: any,
   ) {
-    const user = req.user.sub; // Aquí está el usuario del token
-    return await this.cargasExcelService.procesarExcel(file, user);
+    const usuarioId = req.user.sub;
+    const personaJuridicaId = req.user.datosPersona.persona_juridica_id;
+    return await this.cargasExcelService.procesarExcel(file, usuarioId,personaJuridicaId);
   }
 }

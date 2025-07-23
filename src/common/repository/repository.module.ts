@@ -11,14 +11,15 @@ import { PagosTransaccionDeudaRepository } from "./pagos/pagos.transaccion_deuda
 import { PagosTransaccionesRepository } from "./pagos/pagos.transacciones.repository";
 import { PagosComprobanteFacturaRepository } from "./pagos/pagos.comprobante_factura.repository";
 import { PagosComprobanteReciboRepository } from "./pagos/pagos.comprobante_recibo.repository";
+import { UsuarioPersonaJuridicaRepository } from "./usuario/usuario.persona_juridica.repository";
 
 @Module({
   imports: [], // Importa el ConfigModule para manejar las variables de entorno
   providers: [ UsuarioUsuariosRepository,CotelApiLogRepository,CotelDeudasRepository, 
     CotelTransacionesRepository, PagosCargasExcelRepository, PagosDeudasRepository,
     UsuarioEmpresaConfiguracionRepository,PagosDominiosRepository,PagosTransaccionDeudaRepository,
-    PagosTransaccionesRepository,PagosComprobanteFacturaRepository,PagosComprobanteReciboRepository],
-  exports: [ UsuarioUsuariosRepository,CotelApiLogRepository,CotelDeudasRepository,
+    PagosTransaccionesRepository,PagosComprobanteFacturaRepository,PagosComprobanteReciboRepository,UsuarioPersonaJuridicaRepository],
+  exports: [ UsuarioUsuariosRepository,CotelApiLogRepository,CotelDeudasRepository,UsuarioPersonaJuridicaRepository,
     CotelTransacionesRepository,PagosCargasExcelRepository,PagosDeudasRepository,
     UsuarioEmpresaConfiguracionRepository,PagosDominiosRepository,PagosTransaccionDeudaRepository,
     PagosTransaccionesRepository,PagosComprobanteFacturaRepository,PagosComprobanteReciboRepository]

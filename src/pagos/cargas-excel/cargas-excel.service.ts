@@ -22,15 +22,12 @@ export class CargasExcelService {
     @Inject('DB_CONNECTION') private db: IDatabase<any>,
   ) {}
 
-  async procesarExcel(file: Express.Multer.File, usuarioId:number) {
+  async procesarExcel(file: Express.Multer.File, usuarioId:number,personaJuridicaId:number) {
     try {
       const workbook = XLSX.readFile(file.path);
       const sheetName = workbook.SheetNames[0];
 
       const rawRows = XLSX.utils.sheet_to_json<any>(workbook.Sheets[sheetName]);
-
-
-
 
       const rows: DeudaExcelDto[] = rawRows.map((row) => ({
         codigoCliente: row['codigoCliente']? String(row['codigoCliente']): null,
@@ -48,6 +45,7 @@ export class CargasExcelService {
         montoDescuento:row['montoDescuento'] !== undefined && row['montoDescuento'] !== ''? Number(row['montoDescuento']): null,
         email: row['email'] ? String(row['email']) : null,
         telefono: row['telefono'] ? String(row['telefono']) : null,
+        generaFactura:row['generaFactura'] == '1' || row['generaFactura'] == 1,
       }));
 
       const errores: any[] = [];
@@ -97,6 +95,7 @@ export class CargasExcelService {
       for (const row of rows) {
         await this.pagosDeudasRepository.create({
           carga_id: carga.carga_id,
+          persona_juridica_id:personaJuridicaId,
           codigo_cliente: row.codigoCliente,
           nombre_completo: row.nombreCompleto,
           tipo_documento: row.tipoDocumento,
@@ -112,6 +111,8 @@ export class CargasExcelService {
           monto_descuento: row.montoDescuento,
           email: row.email,
           telefono: row.telefono,
+          genera_factura:row.generaFactura,
+          usuario_registro_id:usuarioId,
           estado_id: 1000,
         });
       }

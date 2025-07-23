@@ -67,12 +67,12 @@ export class UsuarioUsuariosRepository {
   }
   async findPersonaNaturalByPersonaId(personaId: number) {
     const query =
-      "select (pn.nombres ||''|| pn.apellidos) as nombres from usuario.persona_natural pn where pn.persona_natural_id = $1 and estado_id = 1000";
+      "select (pn.nombres ||''|| pn.apellidos) as nombres,pn.persona_natural_id from usuario.persona_natural pn where pn.persona_natural_id = $1 and estado_id = 1000";
     return await this.db.oneOrNone(query, [personaId]);
   }
   async findPersonaJuridicaByPersonaId(personaId: number) {
     const query =
-      'select pj.nombre_empresa as nombres from usuario.persona_juridica  pj where pj.persona_juridica_id = $1 and pj.estado_id = 1000';
+      'select pj.nombre_empresa as nombres, pj.persona_juridica_id from usuario.persona_juridica  pj where pj.persona_juridica_id = $1 and pj.estado_id = 1000';
     return await this.db.oneOrNone(query, [personaId]);
   }
 

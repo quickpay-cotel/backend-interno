@@ -18,6 +18,10 @@ import { UsuarioUsuariosRepository } from 'src/common/repository/usuario/usuario
 import { PagosDominiosRepository } from 'src/common/repository/pagos/pagos.dominios.repository';
 import axios from 'axios';
 import { PagosComprobanteReciboRepository } from 'src/common/repository/pagos/pagos.comprobante_recibo.repository';
+import { v4 as uuidv4 } from 'uuid';
+import { EmailService } from 'src/common/correos/email.service';
+import { UsuarioPersonaJuridicaRepository } from 'src/common/repository/usuario/usuario.persona_juridica.repository';
+
 @Injectable()
 export class CobrosCajaService {
   //private storePath = path.posix.join(process.cwd(), 'store');
@@ -32,12 +36,14 @@ export class CobrosCajaService {
     private readonly usuarioUsuariosRepository: UsuarioUsuariosRepository,
     private readonly pagosDominiosRepository: PagosDominiosRepository,
     private readonly pagosComprobanteReciboRepository: PagosComprobanteReciboRepository,
+    private readonly emailService: EmailService,
+    private readonly usuarioPersonaJuridicaRepository:UsuarioPersonaJuridicaRepository,
     @Inject('DB_CONNECTION') private db: IDatabase<any>,
   ) {}
 
-  async buscarDatosCliente(tipoPago: string, parametroBusqueda: string): Promise<DatosClienteResponseDto> {
+  async buscarDatosCliente(tipoPago: string, parametroBusqueda: string, personaJuridicaId: number): Promise<DatosClienteResponseDto> {
     try {
-      const deudas = await this.pagosDeudasRepository.datosClienteByCriterioBusqueda(parametroBusqueda, parseInt(tipoPago));
+      const deudas = await this.pagosDeudasRepository.datosClienteByCriterioBusqueda(parametroBusqueda, parseInt(tipoPago), personaJuridicaId);
       return {
         codigoCliente: deudas[0].codigo_cliente,
         nombreCompleto: deudas[0].nombre_completo,
@@ -52,10 +58,10 @@ export class CobrosCajaService {
       throw new HttpException('No se encontraron registros de cliente.', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-  async cobrosPendientesByCriterioBusqueda(tipoPago: string, parametroBusqueda: string): Promise<DatosClienteResponseDto[]> {
+  async cobrosPendientesByCriterioBusqueda(tipoPago: string, parametroBusqueda: string, personaJuridicaId: number): Promise<DatosClienteResponseDto[]> {
     console.log(tipoPago);
     try {
-      const deudas = await this.pagosDeudasRepository.cobrosPendientesByCriterioBusqueda(parametroBusqueda, parseInt(tipoPago));
+      const deudas = await this.pagosDeudasRepository.cobrosPendientesByCriterioBusqueda(parametroBusqueda, parseInt(tipoPago), personaJuridicaId);
       return deudas.map((obj) => ({
         deudaId: obj.deuda_id,
         codigoProducto: obj.codigo_producto,
@@ -64,9 +70,10 @@ export class CobrosCajaService {
         cantidad: obj.cantidad,
         precioUnitario: obj.precio_unitario,
         montoDescuento: obj.monto_descuento ?? 0,
-        montoTotal: parseFloat(obj.precio_unitario) * parseFloat(obj.cantidad ?? 1) - parseFloat(obj.monto_descuento ?? 0),
+        montoTotal: obj.monto_total ?? 0,
         email: obj.email,
         telefono: obj.telefono,
+        generaFactura: obj.genera_factura ? 'SI' : 'NO',
         fechaRegistro: obj.fecha_registro,
       }));
     } catch (error) {
@@ -75,50 +82,56 @@ export class CobrosCajaService {
     }
   }
 
-  async confirmaPagoCaja(usuarioId: number, deudasIds: number[]) {
+  async confirmaPagoCaja(usuarioId: number, deudasIds: number[],personaJuridicaId:number) {
     let transactionInsert: any;
+    const myUuid = uuidv4();
+    let lstDeudas = [];
+    let totalAPagar = 0;
     try {
       const lstTransacciones = await this.pagosTransaccionesRepository.findByDeudasIds(deudasIds);
       if (lstTransacciones.length > 0) {
         throw new Error('las deudas ya se encuentran pagadas');
       }
 
-      const lstDeudas: any = await this.pagosDeudasRepository.findByDeudasIds(deudasIds);
+      lstDeudas = await this.pagosDeudasRepository.findByDeudasIds(deudasIds);
       if (lstDeudas.length == 0) {
         throw new Error('las deudas no existen');
       }
-
+      
       // Calcular el total a pagar sumando (precio_unitario * cantidad - monto_descuento) de cada deuda
-      const totalAPagar = parseFloat(
+      totalAPagar = parseFloat(
         lstDeudas
           .reduce((acc, deuda) => {
             const monto = parseFloat(deuda.precio_unitario ?? '0');
-            const cantidad = parseFloat(deuda.cantidad ?? '1');
+            const cantidad = parseFloat(deuda.cantidad);
             const montoDescuento = parseFloat(deuda.monto_descuento ?? '0');
             return acc + (monto * cantidad - montoDescuento);
           }, 0)
           .toFixed(2),
       );
+ 
 
       await this.db.tx(async (t) => {
+        // registrar transaccion
         transactionInsert = await this.pagosTransaccionesRepository.create(
           {
+            codigo_pago: myUuid,
+            origen_pago_id: 1020, // CAJA
             metodo_pago_id: 1018, //CAJA
             monto_pagado: totalAPagar,
-            medio_pago_id: 1020, //EFECTIVO
             moneda: 'BOB',
             estado_transaccion_id: 1009, // PAGADO
             estado_id: 1000,
           },
           t,
         );
-        // cambair estado de deudas reservados a PAGADO
+
+        // registarr transaccion deudaaaa
         for (const deudaReservado of lstDeudas) {
           await this.pagosTransaccionDeudaRepository.create(
             {
               transaccion_id: transactionInsert.transaccion_id,
               deuda_id: deudaReservado.deuda_id,
-              monto_pagado: totalAPagar,
               estado_id: 1000,
             },
             t,
@@ -130,15 +143,37 @@ export class CobrosCajaService {
       throw new HttpException(error.message || 'Error interno del servidor', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    const vNumeroUnico = FuncionesFechas.generarNumeroUnico();
-    let lstDocuentoFacturas = await this.generarFacturaISIPASS(deudasIds, transactionInsert.transaccion_id, vNumeroUnico + '');
-    let lstDocuentoRecibo = await this.generarRecibo(usuarioId, deudasIds, transactionInsert.transaccion_id, vNumeroUnico + '');
+    let lstDocuentoFacturas = await this.generarFacturaISIPASS(deudasIds, transactionInsert.transaccion_id, myUuid);
+    let lstDocuentoRecibo = await this.generarRecibo(usuarioId, deudasIds, transactionInsert.transaccion_id, myUuid);
+
+    const lstTransacciones = await this.pagosTransaccionesRepository.findByDeudasIds(deudasIds);
+
+
+    const personaJuridica:any = await this.usuarioPersonaJuridicaRepository.findByFilters({persona_juridica_id:personaJuridicaId,estado_id : 1000}); // siempre debe retornan 1 ya  q esta busncaod por el id
+    let paymentDataConfirmado = {
+      numeroTransaccion: myUuid,
+      monto: totalAPagar,
+      moneda: 'Bs',
+      fecha: lstTransacciones[0].fecha_transaccion,
+      logoUrl: '',
+      nombreEmpresa: personaJuridica[0].nombre_empresa,
+    };
+
+    let correoEnviado = await this.emailService.sendMailNotifyPaymentAndAttachmentsMailtrap(lstDeudas[0].email, 'Confirmación de Pago Recibida - Pruebas', 
+      paymentDataConfirmado, `${this.storePath}/recibos/recibo-${ myUuid }.pdf`, `${this.storePath}/facturas/factura-${myUuid}.pdf`, `${this.storePath}/facturas/factura-${myUuid}.xml`);
+    this.pagosTransaccionesRepository.update(transactionInsert.transaccion_id, { correo_enviado: correoEnviado });
+
     return [...(lstDocuentoFacturas ?? []), ...(lstDocuentoRecibo ?? [])];
   }
 
-  private async generarFacturaISIPASS(deudasIds: number[], vTransactionId: number, vNumeroUnico: string): Promise<any> {
+  private async generarFacturaISIPASS(deudasIds: number[], vTransactionId: number, myUuid: string): Promise<any> {
     try {
-      const lstDeudas = await this.pagosDeudasRepository.findByDeudasIds(deudasIds);
+      let lstDeudas = await this.pagosDeudasRepository.findByDeudasIds(deudasIds);
+      if (lstDeudas.length == 0) {
+        throw new Error('las deudas no existen');
+      }
+      lstDeudas = lstDeudas.filter((r) => r.genera_factura === true); // solo las que genera Factura
+
       const resFacGenerado = await this.isipassGraphqlService.crearFactura(lstDeudas);
       const facturaCompraVentaCreate = resFacGenerado?.data?.facturaCompraVentaCreate || {};
       const { representacionGrafica, sucursal, puntoVenta } = facturaCompraVentaCreate;
@@ -156,8 +191,8 @@ export class CobrosCajaService {
 
       let lstDocumentos = [];
 
-      let fileNamePdf = `factura-${vTransactionId}_${vNumeroUnico}.pdf`;
-      let fileNameXml = `factura-${vTransactionId}_${vNumeroUnico}.xml`;
+      let fileNamePdf = `factura-${myUuid}.pdf`;
+      let fileNameXml = `factura-${myUuid}.xml`;
 
       try {
         const funcionesGenerales = new FuncionesGenerales();
@@ -199,26 +234,27 @@ export class CobrosCajaService {
         punto_venta_codigo: puntoVenta?.codigo,
 
         // otros campos
-        ruta_xml: fileNamePdf,
-        ruta_pdf: filePathXml,
-
+        ruta_xml: fileNameXml,
+        ruta_pdf: fileNamePdf,
+        estado_factura_id: 1021, // VIGENTE
         estado_id: 1000,
       });
 
       return lstDocumentos;
     } catch (error) {
+      //  registrar log de error .....
       this.pagosTransaccionesRepository.update(vTransactionId, {
         estado_transaccion_id: 1013, // PAGO FALLADO
       });
-
       console.error(`Error al generar factura en la transaccion  ${vTransactionId}:`, error);
-      throw new HttpException(error.message || 'Error al generar la factura', HttpStatus.INTERNAL_SERVER_ERROR);
+      //throw new HttpException(error.message || 'Error al generar la factura', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  private async generarRecibo(usuarioId: number, deudasIds: number[], vTransactionId: number, vNumeroUnico: string): Promise<any> {
+  private async generarRecibo(usuarioId: number, deudasIds: number[], vTransactionId: number, myUuid: string): Promise<any> {
     let lstDocumentos = [];
     try {
+      // se reuqiere fecha de pago para generar el recibo
       const lstTransacciones = await this.pagosTransaccionesRepository.findByDeudasIds(deudasIds);
       if (lstTransacciones.length == 0) {
         throw new Error('las deudas no estan pagadas');
@@ -229,11 +265,9 @@ export class CobrosCajaService {
         throw new Error('las deudas no existen');
       }
 
-              
-      let nombreRecibo =  'recibo_' + vNumeroUnico + '.pdf';
+      let nombreRecibo = `recibo-${ myUuid }.pdf`;
 
-
-      const dominio = await this.pagosDominiosRepository.findById(lstDeudas[0].tipo_pago_id);
+      const tipoPago = await this.pagosDominiosRepository.findById(lstDeudas[0].tipo_pago_id);
 
       let datosPersonaEmpresa = await this.usuarioUsuariosRepository.findDatosPersonaAndEmpresa(usuarioId);
       if (!datosPersonaEmpresa) {
@@ -248,7 +282,7 @@ export class CobrosCajaService {
         P_nombre_empresa: datosPersonaEmpresa.nombre_empresa,
         P_fecha_pago: lstTransacciones[0].fecha_transaccion,
         P_nombre_cliente: lstDeudas[0].nombre_completo,
-        P_concepto: dominio.descripcion,
+        P_concepto: tipoPago.descripcion,
       };
 
       // Construir las filas de la tabla para todos los items de datosDeuda
@@ -289,18 +323,19 @@ export class CobrosCajaService {
         transaccion_id: vTransactionId,
         ruta_pdf: nombreRecibo,
         fecha_emision: new Date(),
+        estado_recibo_id: 1023, // VIGENTE
         estado_id: 1000,
       });
 
       lstDocumentos.push(nombreRecibo);
       return lstDocumentos;
     } catch (error) {
+      //  registrar log de error .....
       this.pagosTransaccionesRepository.update(vTransactionId, {
         estado_transaccion_id: 1013, // PAGO FALLADO
       });
-
       console.error(`Error al generar recibo para transaccion  ${vTransactionId}:`, error);
-      throw new HttpException(error.message || 'Error al generar la factura', HttpStatus.INTERNAL_SERVER_ERROR);
+      //throw new HttpException(error.message || 'Error al generar la factura', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

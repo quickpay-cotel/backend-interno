@@ -14,19 +14,24 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class CobrosCajaController {
   constructor(private readonly cobrosCajaService: CobrosCajaService) {}
 
-   @Post('datos-cliente')
-  async DatosCliente(@Body() body: ConsultaDeudaRequestDto) {
+  @Post('datos-cliente')
+  @UseGuards(JwtAuthGuard)
+  async DatosCliente(@Body() body: ConsultaDeudaRequestDto,@Request() req) {
     const { tipoPago, parametroBusqueda } = body;
-    return this.cobrosCajaService.buscarDatosCliente(tipoPago, parametroBusqueda);
+    const personaJuridicaId = req.user.datosPersona.persona_juridica_id;
+    return this.cobrosCajaService.buscarDatosCliente(tipoPago, parametroBusqueda,personaJuridicaId);
   }
   @Post('cobros-pendiente')
-  async DeudaCliente(@Body() body: ConsultaDeudaRequestDto) {
+  @UseGuards(JwtAuthGuard)
+  async DeudaCliente(@Body() body: ConsultaDeudaRequestDto,@Request() req) {
     const { tipoPago, parametroBusqueda } = body;
-    return this.cobrosCajaService.cobrosPendientesByCriterioBusqueda(tipoPago, parametroBusqueda);
+    const personaJuridicaId = req.user.datosPersona.persona_juridica_id;
+    return this.cobrosCajaService.cobrosPendientesByCriterioBusqueda(tipoPago, parametroBusqueda,personaJuridicaId);
   }
   @Post('confirma-pago-caja')
   @UseGuards(JwtAuthGuard)
   async confirmaPagoCaja(@Body() deudasIds: number[],@Request() req) {
-    return await this.cobrosCajaService.confirmaPagoCaja(req.user.sub,deudasIds);
+    const personaJuridicaId = req.user.datosPersona.persona_juridica_id;
+    return await this.cobrosCajaService.confirmaPagoCaja(req.user.sub,deudasIds,personaJuridicaId);
   }
 }

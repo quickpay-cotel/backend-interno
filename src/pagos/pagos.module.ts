@@ -16,9 +16,10 @@ import { CobrosRealizadoController } from "./pagos/cobros_realizado.controller";
 import { CobrosRealizadoService } from "./pagos/cobros_realizado.service";
 import { ReportesJasperController } from "./pagos/reportes_jasper.controller";
 import { ReportesJasperService } from "./pagos/reportes_jasper.service";
+import { EmailModule } from "src/common/correos/email.module";
 
 @Module({
-    imports: [RepositoryModule,AuthModule,ExternalServiceModule],
+    imports: [RepositoryModule,AuthModule,ExternalServiceModule,EmailModule],
     controllers: [CargasExcelController, DominiosController,CobrosPendientesController,CobrosCajaController, CobrosRealizadoController,ReportesJasperController],
     providers: [CargasExcelService, DominioService,CobrosPendientesService,CobrosCajaService,CobrosRealizadoService,ReportesJasperService],
     exports: []

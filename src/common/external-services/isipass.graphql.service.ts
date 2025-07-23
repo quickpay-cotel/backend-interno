@@ -94,7 +94,7 @@ export class IsipassGraphqlService {
           },
         },
       );
-
+      // si hay error aveces en elmismo response.error retornaaa
       return response.data;
     } catch (error) {
       console.error('Error al enviar la factura:', error.response?.data || error.message);

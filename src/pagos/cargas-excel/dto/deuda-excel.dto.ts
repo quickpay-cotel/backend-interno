@@ -1,4 +1,5 @@
-import { IsString, IsNumber, IsOptional, IsEmail } from 'class-validator';
+import { IsString, IsNumber, IsEmail, IsOptional, IsBoolean, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class DeudaExcelDto {
   @IsString()
@@ -20,23 +21,21 @@ export class DeudaExcelDto {
   @IsNumber()
   tipoPagoId: number;
 
-    @IsString()
+  @IsString()
   periodo?: string;
-  
+
   @IsString()
   codigoProducto: string;
 
   @IsString()
-  codigoProductoSin: string; // debe ser solo numeross asi es en SIAT
-  
+  codigoProductoSin: string;
 
   @IsString()
   descripcion: string;
 
   @IsNumber()
+  @Min(1) // ✅ cantidad mínima permitida es 1
   cantidad: number;
-
-
 
   @IsNumber()
   precioUnitario: number;
@@ -52,4 +51,9 @@ export class DeudaExcelDto {
   @IsOptional()
   @IsString()
   telefono?: string;
+
+  @Transform(({ value }) => value === '1' || value === 1)
+  @IsBoolean()
+  generaFactura: boolean;
 }
+

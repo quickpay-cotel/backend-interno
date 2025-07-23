@@ -67,33 +67,27 @@ export class PagosDeudasRepository {
 
     return result;
   }
-  async datosClienteByCriterioBusqueda(parametroBusqueda: string, tipoPago: number): Promise<any> {
+  async datosClienteByCriterioBusqueda(parametroBusqueda: string, tipoPago: number, personaJuridicaId:number): Promise<any> {
     const query = ` 
     select d.* from pagos.deudas d where (d.codigo_cliente ILIKE  $1 or d.numero_documento ILIKE  $1 or d.nombre_completo ILIKE  $1) 
-    and d.estado_id = 1000 and d.tipo_pago_id = $2 order by d.periodo desc;
+and d.estado_id = 1000 and d.tipo_pago_id = $2 and d.persona_juridica_id=$3 order by d.periodo desc;
     `;
-    const params = [`%${parametroBusqueda}%`, tipoPago];
+    const params = [`%${parametroBusqueda}%`, tipoPago,personaJuridicaId];
     const result = await this.db.many(query, params);
     return result;
   }
 
   // me todo que pemrmite buscar cobros pendinetes en funcion a COD CLIENTE Y NRO DOCUMENTO
-  async cobrosPendientesByCriterioBusqueda(parametroBusqueda: string, tipoPago: number): Promise<any> {
+  async cobrosPendientesByCriterioBusqueda(parametroBusqueda: string, tipoPago: number,personaJuridicaId:number): Promise<any> {
     const query = ` 
   select d.deuda_id,d.carga_id,d.codigo_cliente,d.nombre_completo,d.tipo_documento,d.numero_documento,d.complemento_documento,d.tipo_pago_id,	
   d.periodo,d.codigo_producto,d.codigo_producto_sin,d.descripcion,d.cantidad,d.precio_unitario,d.monto_descuento, (d.cantidad*d.precio_unitario-d.monto_descuento) as monto_total,
-  d.email,d.telefono,d.fecha_registro
+  d.email,d.telefono,d.genera_factura , d.fecha_registro
        from pagos.deudas d 
    where (d.codigo_cliente ILIKE  $1 or d.numero_documento ILIKE  $1 or d.nombre_completo ILIKE  $1) 
     and d.estado_id = 1000 and d.tipo_pago_id = $2
     and not exists(
-      select * from pagos.reserva_deuda rd
-	 inner join pagos.datosconfirmado_qr dc on dc.qr_generado_id = rd.qr_generado_id and rd.estado_id = 1000
-	 inner join pagos.transacciones t on t.datosconfirmado_qr_id  = dc.datosconfirmado_qr_id and t.estado_id = 1000
-	 where  rd.deuda_id = d.deuda_id and rd.estado_id = 1000
-    )and not exists(
       select * from pagos.transaccion_deuda td
-	 inner join pagos.transacciones t on t.transaccion_id  = td.transaccion_id and t.estado_id = 1000
 	 where  td.deuda_id = d.deuda_id and td.estado_id = 1000
     )  order by d.periodo desc;
     `;
@@ -102,43 +96,26 @@ export class PagosDeudasRepository {
     return result;
   }
 
-  async findAllDeudasEmpresaByUsuarioId(pUsuarioId: number) {
+  async findCobrosPendienteEmpresaByPersonaJuridicaId(pPersonaJuridica: number) {
     const query = `
 select 
-    d.deuda_id,d.codigo_cliente,d.nombre_completo,
-    d.tipo_documento, d.numero_documento,d.complemento_documento,
-    d.tipo_pago_id, tipoPago.descripcion as tipo_pago,d.codigo_producto,
-    d.codigo_producto_sin,d.descripcion,d.periodo,d.cantidad,
-    d.precio_unitario,d.monto_descuento,d.email,d.telefono,d.fecha_registro
-from  pagos.deudas d
-inner join pagos.cargas_excel ce on d.carga_id = ce.carga_id and ce.estado_id = 1000
+    d.deuda_id, d.codigo_cliente, d.nombre_completo,
+    d.tipo_documento, d.numero_documento, d.complemento_documento,
+    d.tipo_pago_id, tipoPago.descripcion as tipo_pago, d.codigo_producto,
+    d.codigo_producto_sin, d.descripcion, d.periodo, d.cantidad,
+    d.precio_unitario, d.monto_descuento, (d.cantidad*d.precio_unitario- d.monto_descuento) as monto_total,d.email, d.telefono,d.genera_factura, d.fecha_registro
+from pagos.deudas d
 inner join pagos.dominios tipoPago on tipoPago.dominio_id = d.tipo_pago_id
-inner join usuario.usuarios u on u.usuario_id = ce.usuario_id
-where d.estado_id = 1000 and u.persona_juridica_id = (
-        select persona_juridica_id  
-        from usuario.usuarios  
-        where usuario_id = $1
-        limit 1
-    )
-    and (
-    -- que no este pagado en caja
-    not exists (
-        select 1 
-        from pagos.transaccion_deuda td
-        inner join pagos.transacciones t on t.transaccion_id  = td.transaccion_id and t.estado_id = 1000
-        where td.deuda_id = d.deuda_id 
-        and td.estado_id = 1000
-    ) -- que no este pagado por QR
-    and not exists(
-    	 select 1 
-        from pagos.reserva_deuda r  
-        inner join pagos.datosconfirmado_qr dc on dc.qr_generado_id  = r.qr_generado_id and dc.estado_id = 1000
-        inner join pagos.transacciones t on t.datosconfirmado_qr_id = dc.datosconfirmado_qr_id and t.estado_id = 1000
-        where r.deuda_id = d.deuda_id 
-        and r.estado_id = 1000
-    )
-    )order by   d.fecha_registro desc;`;
-    const params = [pUsuarioId];
+where d.estado_id = 1000 
+  and d.persona_juridica_id = $1
+  and not exists (
+      select 1 
+      from pagos.transaccion_deuda td 
+      where td.deuda_id = d.deuda_id and td.estado_id = 1000
+  )
+order by d.fecha_registro desc;
+`;
+    const params = [pPersonaJuridica];
     const result = await this.db.manyOrNone(query, params);
     return result;
   }

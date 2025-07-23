@@ -51,7 +51,7 @@ export class UsuarioController {
     FileInterceptor('logo', {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const logoPath = path.join(process.env.STATIC_FILES_PATH, 'store', 'logos');
+          const logoPath = path.join(process.env.STATIC_FILES_PATH, 'logos');
           cb(null, logoPath);
         },
         filename: (req, file, cb) => {
