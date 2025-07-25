@@ -9,6 +9,7 @@ import {
 import { ConsultaDeudaRequestDto } from './dto/request/consulta-deuda-request.dto';
 import { CobrosCajaService } from './cobros_caja.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ConfirmaPagoCajaRequestDto } from './dto/request/confirma-pago-caja-request.dto';
 
 @Controller('cobros-caja')
 export class CobrosCajaController {
@@ -30,8 +31,8 @@ export class CobrosCajaController {
   }
   @Post('confirma-pago-caja')
   @UseGuards(JwtAuthGuard)
-  async confirmaPagoCaja(@Body() deudasIds: number[],@Request() req) {
+  async confirmaPagoCaja(  @Body() body: ConfirmaPagoCajaRequestDto, @Request() req) {
     const personaJuridicaId = req.user.datosPersona.persona_juridica_id;
-    return await this.cobrosCajaService.confirmaPagoCaja(req.user.sub,deudasIds,personaJuridicaId);
+    return await this.cobrosCajaService.confirmaPagoCaja(req.user.sub,body,personaJuridicaId);
   }
 }

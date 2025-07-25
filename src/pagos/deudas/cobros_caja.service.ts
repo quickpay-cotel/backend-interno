@@ -21,6 +21,7 @@ import { PagosComprobanteReciboRepository } from 'src/common/repository/pagos/pa
 import { v4 as uuidv4 } from 'uuid';
 import { EmailService } from 'src/common/correos/email.service';
 import { UsuarioPersonaJuridicaRepository } from 'src/common/repository/usuario/usuario.persona_juridica.repository';
+import { ConfirmaPagoCajaRequestDto } from './dto/request/confirma-pago-caja-request.dto';
 
 @Injectable()
 export class CobrosCajaService {
@@ -82,18 +83,18 @@ export class CobrosCajaService {
     }
   }
 
-  async confirmaPagoCaja(usuarioId: number, deudasIds: number[],personaJuridicaId:number) {
+  async confirmaPagoCaja(usuarioId: number, confirmaPagoCajaRequestDto:ConfirmaPagoCajaRequestDto,personaJuridicaId:number) {
     let transactionInsert: any;
     const myUuid = uuidv4();
     let lstDeudas = [];
     let totalAPagar = 0;
     try {
-      const lstTransacciones = await this.pagosTransaccionesRepository.findByDeudasIds(deudasIds);
+      const lstTransacciones = await this.pagosTransaccionesRepository.findByDeudasIds(confirmaPagoCajaRequestDto.deudasIds);
       if (lstTransacciones.length > 0) {
         throw new Error('las deudas ya se encuentran pagadas');
       }
 
-      lstDeudas = await this.pagosDeudasRepository.findByDeudasIds(deudasIds);
+      lstDeudas = await this.pagosDeudasRepository.findByDeudasIds(confirmaPagoCajaRequestDto.deudasIds);
       if (lstDeudas.length == 0) {
         throw new Error('las deudas no existen');
       }
@@ -116,11 +117,12 @@ export class CobrosCajaService {
         transactionInsert = await this.pagosTransaccionesRepository.create(
           {
             codigo_pago: myUuid,
-            origen_pago_id: 1020, // CAJA
-            metodo_pago_id: 1018, //CAJA
+            origen_pago_id: 1007, // CAJA
+            metodo_pago_id: 1009, //CAJA
             monto_pagado: totalAPagar,
             moneda: 'BOB',
-            estado_transaccion_id: 1009, // PAGADO
+            estado_transaccion_id: 1012, // PAGADO
+            correo_notificacion:confirmaPagoCajaRequestDto.correo,
             estado_id: 1000,
           },
           t,
@@ -143,10 +145,10 @@ export class CobrosCajaService {
       throw new HttpException(error.message || 'Error interno del servidor', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    let lstDocuentoFacturas = await this.generarFacturaISIPASS(deudasIds, transactionInsert.transaccion_id, myUuid);
-    let lstDocuentoRecibo = await this.generarRecibo(usuarioId, deudasIds, transactionInsert.transaccion_id, myUuid);
+    let lstDocuentoFacturas = await this.generarFacturaISIPASS(confirmaPagoCajaRequestDto.deudasIds, transactionInsert.transaccion_id, myUuid);
+    let lstDocuentoRecibo = await this.generarRecibo(usuarioId,confirmaPagoCajaRequestDto.deudasIds, transactionInsert.transaccion_id, myUuid);
 
-    const lstTransacciones = await this.pagosTransaccionesRepository.findByDeudasIds(deudasIds);
+    const lstTransacciones = await this.pagosTransaccionesRepository.findByDeudasIds(confirmaPagoCajaRequestDto.deudasIds);
 
 
     const personaJuridica:any = await this.usuarioPersonaJuridicaRepository.findByFilters({persona_juridica_id:personaJuridicaId,estado_id : 1000}); // siempre debe retornan 1 ya  q esta busncaod por el id
@@ -236,18 +238,15 @@ export class CobrosCajaService {
         // otros campos
         ruta_xml: fileNameXml,
         ruta_pdf: fileNamePdf,
-        estado_factura_id: 1021, // VIGENTE
+        estado_factura_id:1015, // VIGENTE
         estado_id: 1000,
       });
 
       return lstDocumentos;
     } catch (error) {
       //  registrar log de error .....
-      this.pagosTransaccionesRepository.update(vTransactionId, {
-        estado_transaccion_id: 1013, // PAGO FALLADO
-      });
+      this.pagosTransaccionesRepository.update(vTransactionId, {estado_transaccion_id: 1014});
       console.error(`Error al generar factura en la transaccion  ${vTransactionId}:`, error);
-      //throw new HttpException(error.message || 'Error al generar la factura', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -323,7 +322,7 @@ export class CobrosCajaService {
         transaccion_id: vTransactionId,
         ruta_pdf: nombreRecibo,
         fecha_emision: new Date(),
-        estado_recibo_id: 1023, // VIGENTE
+        estado_recibo_id: 1017, // VIGENTE
         estado_id: 1000,
       });
 
